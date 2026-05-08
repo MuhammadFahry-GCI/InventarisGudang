@@ -13,9 +13,23 @@ public class User {
         this.role = role;
     }
 
-    public int getIdUser() { return idUser; }
-    public String getNama() { return nama; }
-    public String getUsername() { return username; }
-    public String getRole() { return role; }
-    public boolean isAdmin() { return "admin".equals(role); }
+    public int getIdUser() {
+        return idUser;
+    }
+
+    public String getNama() {
+        return nama;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public boolean isAdmin() {
+        return "admin".equals(role);
+    }
 }

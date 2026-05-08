@@ -22,7 +22,10 @@ public class TransaksiView {
     private TableView<Transaksi> table;
     private ObservableList<Transaksi> data = FXCollections.observableArrayList();
 
-    public TransaksiView() { buildUI(); loadData(); }
+    public TransaksiView() {
+        buildUI();
+        loadData();
+    }
 
     private void buildUI() {
         root = new VBox(0);
@@ -33,7 +36,8 @@ public class TransaksiView {
         topbar.setAlignment(Pos.CENTER_LEFT);
         Label title = new Label("Transaksi Barang");
         title.getStyleClass().add("page-title");
-        Region sp = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
         Button addBtn = new Button("+ Tambah Transaksi");
         addBtn.getStyleClass().add("btn-primary");
         addBtn.setOnAction(e -> showForm());
@@ -57,16 +61,23 @@ public class TransaksiView {
         TableColumn<Transaksi, String> colJenis = new TableColumn<>("Jenis");
         colJenis.setMaxWidth(90);
         colJenis.setCellFactory(col -> new TableCell<>() {
-            @Override protected void updateItem(String item, boolean empty) {
+            @Override
+            protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) { setGraphic(null); return; }
+                if (empty) {
+                    setGraphic(null);
+                    return;
+                }
                 Transaksi t = getTableView().getItems().get(getIndex());
                 String jenis = t.getJenisTransaksi();
                 Label badge = new Label(jenis);
                 badge.setStyle(switch (jenis) {
-                    case "masuk"  -> "-fx-background-color:#D1FAE5;-fx-text-fill:#065F46;-fx-background-radius:20;-fx-padding:3 10;-fx-font-size:11px;-fx-font-weight:bold;";
-                    case "keluar" -> "-fx-background-color:#FEE2E2;-fx-text-fill:#991B1B;-fx-background-radius:20;-fx-padding:3 10;-fx-font-size:11px;-fx-font-weight:bold;";
-                    default       -> "-fx-background-color:#FEF3C7;-fx-text-fill:#92400E;-fx-background-radius:20;-fx-padding:3 10;-fx-font-size:11px;-fx-font-weight:bold;";
+                    case "masuk" ->
+                        "-fx-background-color:#D1FAE5;-fx-text-fill:#065F46;-fx-background-radius:20;-fx-padding:3 10;-fx-font-size:11px;-fx-font-weight:bold;";
+                    case "keluar" ->
+                        "-fx-background-color:#FEE2E2;-fx-text-fill:#991B1B;-fx-background-radius:20;-fx-padding:3 10;-fx-font-size:11px;-fx-font-weight:bold;";
+                    default ->
+                        "-fx-background-color:#FEF3C7;-fx-text-fill:#92400E;-fx-background-radius:20;-fx-padding:3 10;-fx-font-size:11px;-fx-font-weight:bold;";
                 });
                 setGraphic(badge);
             }
@@ -106,21 +117,23 @@ public class TransaksiView {
         try {
             Connection conn = DatabaseConnection.getConnection();
             String sql = "SELECT t.id_transaksi, b.nama_barang, b.kode_barang, g.nama_gudang, " +
-                "COALESCE(s.nama_supplier,'-') as nama_supplier, u.nama as nama_user, " +
-                "t.jenis_transaksi, t.jumlah, t.tanggal, t.keterangan " +
-                "FROM transaksi t JOIN barang b ON t.id_barang=b.id_barang " +
-                "JOIN gudang g ON t.id_gudang=g.id_gudang " +
-                "LEFT JOIN supplier s ON t.id_supplier=s.id_supplier " +
-                "JOIN users u ON t.id_user=u.id_user ORDER BY t.id_transaksi DESC";
+                    "COALESCE(s.nama_supplier,'-') as nama_supplier, u.nama as nama_user, " +
+                    "t.jenis_transaksi, t.jumlah, t.tanggal, t.keterangan " +
+                    "FROM transaksi t JOIN barang b ON t.id_barang=b.id_barang " +
+                    "JOIN gudang g ON t.id_gudang=g.id_gudang " +
+                    "LEFT JOIN supplier s ON t.id_supplier=s.id_supplier " +
+                    "JOIN users u ON t.id_user=u.id_user ORDER BY t.id_transaksi DESC";
             ResultSet rs = conn.createStatement().executeQuery(sql);
             while (rs.next()) {
                 data.add(new Transaksi(rs.getInt("id_transaksi"), rs.getString("nama_barang"),
-                    rs.getString("kode_barang"), rs.getString("nama_gudang"),
-                    rs.getString("nama_supplier"), rs.getString("nama_user"),
-                    rs.getString("jenis_transaksi"), rs.getInt("jumlah"),
-                    rs.getDate("tanggal").toLocalDate(), rs.getString("keterangan")));
+                        rs.getString("kode_barang"), rs.getString("nama_gudang"),
+                        rs.getString("nama_supplier"), rs.getString("nama_user"),
+                        rs.getString("jenis_transaksi"), rs.getInt("jumlah"),
+                        rs.getDate("tanggal").toLocalDate(), rs.getString("keterangan")));
             }
-        } catch (Exception ex) { System.err.println(ex.getMessage()); }
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
     }
 
     private void showForm() {
@@ -130,27 +143,50 @@ public class TransaksiView {
         form.setPadding(new Insets(20));
         form.setPrefWidth(400);
 
-        List<String[]> barangList   = loadList("SELECT id_barang, nama_barang FROM barang");
-        List<String[]> gudangList   = loadList("SELECT id_gudang, nama_gudang FROM gudang");
+        List<String[]> barangList = loadList("SELECT id_barang, nama_barang FROM barang");
+        List<String[]> gudangList = loadList("SELECT id_gudang, nama_gudang FROM gudang");
         List<String[]> supplierList = loadList("SELECT id_supplier, nama_supplier FROM supplier");
 
-        ComboBox<String> cbBarang   = buildCombo(barangList);
-        ComboBox<String> cbGudang   = buildCombo(gudangList);
-        ComboBox<String> cbJenis    = new ComboBox<>(FXCollections.observableArrayList("masuk", "keluar", "retur"));
+        ComboBox<String> cbBarang = buildCombo(barangList);
+        ComboBox<String> cbGudang = buildCombo(gudangList);
+        ComboBox<String> cbJenis = new ComboBox<>(FXCollections.observableArrayList("masuk", "keluar", "retur"));
         cbJenis.setPrefWidth(Double.MAX_VALUE);
         ComboBox<String> cbSupplier = buildCombo(supplierList);
 
-        TextField tfJumlah   = new TextField("1");
+        TextField tfJumlah = new TextField("1");
         DatePicker datePicker = new DatePicker(LocalDate.now());
         datePicker.setPrefWidth(Double.MAX_VALUE);
         TextField tfKet = new TextField();
 
+        // Label info stok — update otomatis saat barang atau gudang dipilih
+        Label lblStokInfo = new Label("");
+        lblStokInfo.setStyle("-fx-text-fill: #475569; -fx-font-size: 12px;");
+
+        Runnable updateStokInfo = () -> {
+            int idxBarang = cbBarang.getSelectionModel().getSelectedIndex();
+            int idxGudang = cbGudang.getSelectionModel().getSelectedIndex();
+            if (idxBarang >= 0 && idxGudang >= 0) {
+                int stok = getStokTersedia(
+                        Integer.parseInt(barangList.get(idxBarang)[0]),
+                        Integer.parseInt(gudangList.get(idxGudang)[0]));
+                lblStokInfo.setText("Stok tersedia di gudang ini: " + stok);
+                lblStokInfo.setStyle(stok == 0
+                        ? "-fx-text-fill: #EF4444; -fx-font-size: 12px; -fx-font-weight: bold;"
+                        : "-fx-text-fill: #10B981; -fx-font-size: 12px; -fx-font-weight: bold;");
+            } else {
+                lblStokInfo.setText("");
+            }
+        };
+
+        cbBarang.setOnAction(e -> updateStokInfo.run());
+        cbGudang.setOnAction(e -> updateStokInfo.run());
+
         form.getChildren().addAll(
-            fg("Barang", cbBarang), fg("Gudang", cbGudang),
-            fg("Jenis Transaksi", cbJenis), fg("Jumlah", tfJumlah),
-            fg("Supplier (opsional)", cbSupplier), fg("Tanggal", datePicker),
-            fg("Keterangan", tfKet)
-        );
+                fg("Barang", cbBarang), fg("Gudang", cbGudang),
+                fg("Jenis Transaksi", cbJenis), fg("Jumlah", tfJumlah),
+                fg("Info Stok", lblStokInfo),
+                fg("Supplier (opsional)", cbSupplier), fg("Tanggal", datePicker),
+                fg("Keterangan", tfKet));
 
         dialog.getDialogPane().setContent(form);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -158,50 +194,150 @@ public class TransaksiView {
 
         dialog.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
+
+                // Validasi ComboBox wajib
+                if (cbBarang.getSelectionModel().getSelectedIndex() < 0) {
+                    showAlert("Validasi", "Barang harus dipilih!");
+                    return;
+                }
+                if (cbGudang.getSelectionModel().getSelectedIndex() < 0) {
+                    showAlert("Validasi", "Gudang harus dipilih!");
+                    return;
+                }
+                if (cbJenis.getValue() == null) {
+                    showAlert("Validasi", "Jenis transaksi harus dipilih!");
+                    return;
+                }
+
+                // Validasi jumlah
+                int jumlah;
                 try {
-                    Connection conn = DatabaseConnection.getConnection();
-                    int idBarang   = Integer.parseInt(barangList.get(cbBarang.getSelectionModel().getSelectedIndex())[0]);
-                    int idGudang   = Integer.parseInt(gudangList.get(cbGudang.getSelectionModel().getSelectedIndex())[0]);
-                    int jumlah     = Integer.parseInt(tfJumlah.getText());
-                    String jenis   = cbJenis.getValue();
-                    Integer idSup  = cbSupplier.getValue() != null && cbSupplier.getSelectionModel().getSelectedIndex() >= 0
-                        ? Integer.parseInt(supplierList.get(cbSupplier.getSelectionModel().getSelectedIndex())[0]) : null;
+                    jumlah = Integer.parseInt(tfJumlah.getText().trim());
+                    if (jumlah <= 0) {
+                        showAlert("Validasi", "Jumlah harus lebih dari 0!");
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    showAlert("Validasi", "Jumlah harus berupa angka!");
+                    return;
+                }
 
-                    PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO transaksi(id_barang,id_gudang,id_supplier,id_user,jenis_transaksi,jumlah,tanggal,keterangan) VALUES(?,?,?,?,?,?,?,?)");
-                    ps.setInt(1, idBarang); ps.setInt(2, idGudang);
-                    if (idSup != null) ps.setInt(3, idSup); else ps.setNull(3, Types.INTEGER);
-                    ps.setInt(4, Session.getUser().getIdUser());
-                    ps.setString(5, jenis); ps.setInt(6, jumlah);
-                    ps.setDate(7, Date.valueOf(datePicker.getValue()));
-                    ps.setString(8, tfKet.getText());
-                    ps.executeUpdate();
+                int idBarang = Integer.parseInt(barangList.get(cbBarang.getSelectionModel().getSelectedIndex())[0]);
+                int idGudang = Integer.parseInt(gudangList.get(cbGudang.getSelectionModel().getSelectedIndex())[0]);
+                String jenis = cbJenis.getValue();
 
-                    // Update stok
-                    int delta = "masuk".equals(jenis) ? jumlah : -jumlah;
-                    PreparedStatement psStok = conn.prepareStatement(
-                        "INSERT INTO stok(id_barang,id_gudang,jumlah_stok) VALUES(?,?,?) " +
-                        "ON DUPLICATE KEY UPDATE jumlah_stok=jumlah_stok+" + delta);
-                    psStok.setInt(1, idBarang); psStok.setInt(2, idGudang);
-                    psStok.setInt(3, Math.max(delta, 0));
-                    psStok.executeUpdate();
+                // Validasi stok untuk transaksi keluar dan retur
+                if ("keluar".equals(jenis) || "retur".equals(jenis)) {
+                    int stokTersedia = getStokTersedia(idBarang, idGudang);
+                    if (stokTersedia <= 0) {
+                        new Alert(Alert.AlertType.ERROR,
+                                "Transaksi gagal!\n\nStok barang \"" +
+                                        barangList.get(cbBarang.getSelectionModel().getSelectedIndex())[1] +
+                                        "\" di gudang ini sudah HABIS (0).\nTidak bisa melakukan transaksi " + jenis
+                                        + ".")
+                                .showAndWait();
+                        return;
+                    }
+                    if (jumlah > stokTersedia) {
+                        new Alert(Alert.AlertType.ERROR,
+                                "Transaksi gagal! Stok tidak cukup.\n\n" +
+                                        "Barang  : "
+                                        + barangList.get(cbBarang.getSelectionModel().getSelectedIndex())[1] + "\n" +
+                                        "Gudang  : "
+                                        + gudangList.get(cbGudang.getSelectionModel().getSelectedIndex())[1] + "\n" +
+                                        "Stok tersedia : " + stokTersedia + "\n" +
+                                        "Jumlah diminta : " + jumlah + "\n\n" +
+                                        "Kurangi jumlah transaksi atau pilih gudang lain.")
+                                .showAndWait();
+                        return;
+                    }
+                }
 
-                    loadData();
-                } catch (Exception ex) { new Alert(Alert.AlertType.ERROR, ex.getMessage()).show(); }
+                // Konfirmasi sebelum simpan
+                String namaBarang = barangList.get(cbBarang.getSelectionModel().getSelectedIndex())[1];
+                String namaGudang = gudangList.get(cbGudang.getSelectionModel().getSelectedIndex())[1];
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                        "Konfirmasi transaksi:\n\n" +
+                                "Barang  : " + namaBarang + "\n" +
+                                "Gudang  : " + namaGudang + "\n" +
+                                "Jenis   : " + jenis + "\n" +
+                                "Jumlah  : " + jumlah,
+                        ButtonType.YES, ButtonType.NO);
+                confirm.setTitle("Konfirmasi Transaksi");
+
+                confirm.showAndWait().ifPresent(c -> {
+                    if (c == ButtonType.YES) {
+                        try {
+                            Connection conn = DatabaseConnection.getConnection();
+                            Integer idSup = cbSupplier.getValue() != null
+                                    && cbSupplier.getSelectionModel().getSelectedIndex() >= 0
+                                            ? Integer.parseInt(supplierList
+                                                    .get(cbSupplier.getSelectionModel().getSelectedIndex())[0])
+                                            : null;
+
+                            PreparedStatement ps = conn.prepareStatement(
+                                    "INSERT INTO transaksi(id_barang,id_gudang,id_supplier,id_user,jenis_transaksi,jumlah,tanggal,keterangan) VALUES(?,?,?,?,?,?,?,?)");
+                            ps.setInt(1, idBarang);
+                            ps.setInt(2, idGudang);
+                            if (idSup != null)
+                                ps.setInt(3, idSup);
+                            else
+                                ps.setNull(3, Types.INTEGER);
+                            ps.setInt(4, Session.getUser().getIdUser());
+                            ps.setString(5, jenis);
+                            ps.setInt(6, jumlah);
+                            ps.setDate(7, Date.valueOf(datePicker.getValue()));
+                            ps.setString(8, tfKet.getText());
+                            ps.executeUpdate();
+
+                            // Update stok
+                            int delta = "masuk".equals(jenis) ? jumlah : -jumlah;
+                            PreparedStatement psStok = conn.prepareStatement(
+                                    "INSERT INTO stok(id_barang,id_gudang,jumlah_stok) VALUES(?,?,?) " +
+                                            "ON DUPLICATE KEY UPDATE jumlah_stok=jumlah_stok+" + delta);
+                            psStok.setInt(1, idBarang);
+                            psStok.setInt(2, idGudang);
+                            psStok.setInt(3, Math.max(delta, 0));
+                            psStok.executeUpdate();
+
+                            new Alert(Alert.AlertType.INFORMATION, "Transaksi berhasil disimpan!").show();
+                            loadData();
+                        } catch (Exception ex) {
+                            new Alert(Alert.AlertType.ERROR, ex.getMessage()).show();
+                        }
+                    }
+                });
             }
         });
     }
 
+    // Ambil stok tersedia untuk barang di gudang tertentu
+    private int getStokTersedia(int idBarang, int idGudang) {
+        try {
+            PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(
+                    "SELECT COALESCE(jumlah_stok, 0) FROM stok WHERE id_barang=? AND id_gudang=?");
+            ps.setInt(1, idBarang);
+            ps.setInt(2, idGudang);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getInt(1);
+        } catch (Exception ignored) {
+        }
+        return 0;
+    }
+
     private VBox fg(String label, javafx.scene.Node field) {
         VBox g = new VBox(6);
-        Label l = new Label(label); l.getStyleClass().add("section-label");
+        Label l = new Label(label);
+        l.getStyleClass().add("section-label");
         g.getChildren().addAll(l, field);
         return g;
     }
 
     private ComboBox<String> buildCombo(List<String[]> list) {
         ComboBox<String> cb = new ComboBox<>();
-        for (String[] item : list) cb.getItems().add(item[1]);
+        for (String[] item : list)
+            cb.getItems().add(item[1]);
         cb.setPrefWidth(Double.MAX_VALUE);
         return cb;
     }
@@ -210,10 +346,18 @@ public class TransaksiView {
         List<String[]> list = new ArrayList<>();
         try {
             ResultSet rs = DatabaseConnection.getConnection().createStatement().executeQuery(sql);
-            while (rs.next()) list.add(new String[]{rs.getString(1), rs.getString(2)});
-        } catch (Exception ignored) {}
+            while (rs.next())
+                list.add(new String[] { rs.getString(1), rs.getString(2) });
+        } catch (Exception ignored) {
+        }
         return list;
     }
 
-    public Parent getView() { return root; }
+    private void showAlert(String title, String msg) {
+        new Alert(Alert.AlertType.ERROR, msg).show();
+    }
+
+    public Parent getView() {
+        return root;
+    }
 }

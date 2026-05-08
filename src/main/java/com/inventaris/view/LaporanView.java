@@ -18,7 +18,9 @@ public class LaporanView {
     // Sesuaikan dengan URL server PHP kamu
     private static final String PHP_BASE = "http://localhost/php_laporan/";
 
-    public LaporanView() { buildUI(); }
+    public LaporanView() {
+        buildUI();
+    }
 
     private void buildUI() {
         root = new VBox(0);
@@ -39,13 +41,12 @@ public class LaporanView {
 
         HBox cards = new HBox(16);
         cards.getChildren().addAll(
-            reportCard("📊", "Laporan Stok", "Lihat stok semua barang per gudang",
-                "#4F46E5", "#EEF2FF", "laporan_stok.php"),
-            reportCard("🔄", "Laporan Transaksi", "Riwayat semua transaksi masuk/keluar",
-                "#10B981", "#D1FAE5", "laporan_transaksi.php"),
-            reportCard("⚠️", "Barang Stok Minim", "Daftar barang yang perlu restock segera",
-                "#F59E0B", "#FEF3C7", "laporan_stok_minim.php")
-        );
+                reportCard("📊", "Laporan Stok", "Lihat stok semua barang per gudang",
+                        "#4F46E5", "#EEF2FF", "laporan_stok.php"),
+                reportCard("🔄", "Laporan Transaksi", "Riwayat semua transaksi masuk/keluar",
+                        "#10B981", "#D1FAE5", "laporan_transaksi.php"),
+                reportCard("⚠️", "Barang Stok Minim", "Daftar barang yang perlu restock segera",
+                        "#F59E0B", "#FEF3C7", "laporan_stok_minim.php"));
 
         content.getChildren().addAll(subtitle, cards);
         root.getChildren().addAll(topbar, content);
@@ -56,10 +57,12 @@ public class LaporanView {
         card.getStyleClass().add("stat-card");
         card.setPadding(new Insets(24));
         card.setPrefWidth(220);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #E2E8F0; -fx-border-radius: 12; -fx-cursor: hand;");
+        card.setStyle(
+                "-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #E2E8F0; -fx-border-radius: 12; -fx-cursor: hand;");
 
         Rectangle iconBg = new Rectangle(50, 50);
-        iconBg.setArcWidth(14); iconBg.setArcHeight(14);
+        iconBg.setArcWidth(14);
+        iconBg.setArcHeight(14);
         iconBg.setFill(Color.web(bgColor));
         Label iconLabel = new Label(icon);
         iconLabel.setStyle("-fx-font-size: 24px;");
@@ -74,7 +77,8 @@ public class LaporanView {
         descLabel.setWrapText(true);
 
         Button openBtn = new Button("Buka Laporan →");
-        openBtn.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
+        openBtn.setStyle("-fx-background-color: " + color
+                + "; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;");
         openBtn.setMaxWidth(Double.MAX_VALUE);
         openBtn.setOnAction(e -> openBrowser(PHP_BASE + phpFile));
 
@@ -88,12 +92,14 @@ public class LaporanView {
                 Desktop.getDesktop().browse(new URI(url));
             } else {
                 // Fallback untuk Linux
-                Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                Runtime.getRuntime().exec(new String[] { "xdg-open", url });
             }
         } catch (Exception ex) {
             System.err.println("Gagal buka browser: " + ex.getMessage());
         }
     }
 
-    public Parent getView() { return root; }
+    public Parent getView() {
+        return root;
+    }
 }
