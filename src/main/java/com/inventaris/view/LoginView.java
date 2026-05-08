@@ -86,7 +86,7 @@ public class LoginView {
         loginBtn.setMaxWidth(Double.MAX_VALUE);
         loginBtn.setPrefHeight(44);
 
-        Label footer = new Label("© 2025 Sistem Inventaris Gudang — Pekanbaru");
+        Label footer = new Label("© 2026 Sistem Inventaris Gudang — Pekanbaru");
         footer.setStyle("-fx-font-size: 11px; -fx-text-fill: #94A3B8;");
         footer.setAlignment(Pos.CENTER);
 
@@ -103,11 +103,10 @@ public class LoginView {
         passwordField.setOnAction(e -> loginBtn.fire());
 
         card.getChildren().addAll(
-            logoBox, sep, loginTitle, loginSub,
-            usernameLabel, usernameField,
-            passwordLabel, passwordField,
-            errorLabel, loginBtn, footer
-        );
+                logoBox, sep, loginTitle, loginSub,
+                usernameLabel, usernameField,
+                passwordLabel, passwordField,
+                errorLabel, loginBtn, footer);
         VBox.setMargin(footer, new Insets(4, 0, 0, 0));
 
         root.getChildren().add(card);
@@ -117,14 +116,13 @@ public class LoginView {
         try {
             Connection conn = DatabaseConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(
-                "SELECT id_user, nama, username, role FROM users WHERE username = ? AND password = ?"
-            );
+                    "SELECT id_user, nama, username, role FROM users WHERE username = ? AND password = ?");
             ps.setString(1, username);
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 User user = new User(rs.getInt("id_user"), rs.getString("nama"),
-                    rs.getString("username"), rs.getString("role"));
+                        rs.getString("username"), rs.getString("role"));
                 Session.setUser(user);
                 openMainView();
             } else {
@@ -149,5 +147,7 @@ public class LoginView {
         stage.centerOnScreen();
     }
 
-    public Parent getView() { return root; }
+    public Parent getView() {
+        return root;
+    }
 }
