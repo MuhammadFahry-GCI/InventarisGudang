@@ -1,4 +1,4 @@
-# 📦 InventarisGudang — Sistem Inventaris Barang
+# 📦 InventarisGudang — Sistem Inventaris Barang.
 
 Aplikasi desktop sederhana berbasis **JavaFX + Maven** untuk membantu pengelolaan data inventaris barang secara lebih rapi dan terstruktur menggunakan database MySQL.
 
