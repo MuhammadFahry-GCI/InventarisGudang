@@ -122,7 +122,7 @@ public class TransaksiView {
                     "FROM transaksi t JOIN barang b ON t.id_barang=b.id_barang " +
                     "JOIN gudang g ON t.id_gudang=g.id_gudang " +
                     "LEFT JOIN supplier s ON t.id_supplier=s.id_supplier " +
-                    "JOIN users u ON t.id_user=u.id_user ORDER BY t.id_transaksi DESC";
+                    "JOIN users u ON t.id_user=u.id_user ORDER BY t.id_transaksi ASC";
             ResultSet rs = conn.createStatement().executeQuery(sql);
             while (rs.next()) {
                 data.add(new Transaksi(rs.getInt("id_transaksi"), rs.getString("nama_barang"),
