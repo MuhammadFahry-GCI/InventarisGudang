@@ -206,9 +206,34 @@ public class BarangView {
             cbKat.getItems().add(k[1]);
 
         TextField tfKode = new TextField(barang != null ? barang.getKodeBarang() : "");
+        tfKode.setEditable(false); // kode otomatis, tidak bisa diedit manual
+        tfKode.setStyle("-fx-background-color: #F3F4F6; -fx-text-fill: #6B7280;");
+        tfKode.setPromptText("Otomatis terisi saat kategori dipilih");
+
         TextField tfNama = new TextField(barang != null ? barang.getNamaBarang() : "");
         TextField tfSat = new TextField(barang != null ? barang.getSatuan() : "pcs");
         TextField tfMin = new TextField(barang != null ? String.valueOf(barang.getStokMinimum()) : "0");
+
+        // Listener: generate kode otomatis saat kategori dipilih (hanya untuk tambah
+        // baru)
+        if (barang == null) {
+            cbKat.setOnAction(e -> {
+                String selectedKat = cbKat.getValue();
+                if (selectedKat != null) {
+                    // Cari id_kategori dari nama yang dipilih
+                    String idKat = "";
+                    for (String[] k : kategoriList) {
+                        if (k[1].equals(selectedKat)) {
+                            idKat = k[0];
+                            break;
+                        }
+                    }
+                    // Generate kode otomatis
+                    String kodeOtomatis = generateKodeBarang(selectedKat, idKat);
+                    tfKode.setText(kodeOtomatis);
+                }
+            });
+        }
 
         if (barang != null) {
             for (String[] k : kategoriList)
@@ -378,6 +403,61 @@ public class BarangView {
                 }
             }
         });
+    }
+
+    private String generateKodeBarang(String namaKategori, String idKategori) {
+        // Buat singkatan dari nama kategori (ambil huruf pertama tiap kata, maks 3
+        // huruf)
+        String[] kata = namaKategori.toUpperCase().split("\\s+");
+        StringBuilder singkatan = new StringBuilder();
+        for (String k : kata) {
+            if (!k.isEmpty())
+                singkatan.append(k.charAt(0));
+            if (singkatan.length() >= 3)
+                break;
+        }
+        // Jika singkatan masih kurang dari 3, tambah huruf dari kata pertama
+        if (singkatan.length() < 3 && kata.length > 0) {
+            String kata1 = kata[0];
+            while (singkatan.length() < 3 && singkatan.length() < kata1.length()) {
+                singkatan.append(kata1.charAt(singkatan.length()));
+            }
+        }
+        String prefix = singkatan.toString();
+
+        // Hitung jumlah barang di kategori ini untuk nomor urut berikutnya
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(
+                    "SELECT COUNT(*) FROM barang WHERE id_kategori = ?");
+            ps.setInt(1, Integer.parseInt(idKategori));
+            ResultSet rs = ps.executeQuery();
+            int jumlah = 0;
+            if (rs.next())
+                jumlah = rs.getInt(1);
+
+            // Pastikan kode yang digenerate belum ada (loop sampai dapat yang unik)
+            int nomor = jumlah + 1;
+            String kodeCandidate;
+            do {
+                kodeCandidate = prefix + "-" + String.format("%03d", nomor);
+                PreparedStatement psCheck = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM barang WHERE kode_barang = ?");
+                psCheck.setString(1, kodeCandidate);
+                ResultSet rsCheck = psCheck.executeQuery();
+                if (rsCheck.next() && rsCheck.getInt(1) > 0) {
+                    nomor++; // kode sudah ada, coba nomor berikutnya
+                } else {
+                    break; // kode unik, pakai ini
+                }
+            } while (nomor < 9999);
+
+            return kodeCandidate;
+
+        } catch (Exception ex) {
+            // Fallback jika DB error: pakai timestamp
+            return prefix + "-" + System.currentTimeMillis() % 1000;
+        }
     }
 
     private List<String[]> loadKategori() {
