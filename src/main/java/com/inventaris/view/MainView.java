@@ -65,6 +65,7 @@ public class MainView {
         // Nav buttons
         Button btnDashboard = navButton("🏠  Dashboard");
         Button btnBarang = navButton("📦  Data Barang");
+        Button btnKategori = navButton("🗂  Kategori");
         Button btnStok = navButton("📊  Stok Gudang");
         Button btnTransaksi = navButton("🔄  Transaksi");
         Button btnSupplier = navButton("🏭  Supplier");
@@ -73,7 +74,8 @@ public class MainView {
 
         VBox navGroup = new VBox(2);
         navGroup.setPadding(new Insets(10, 0, 0, 0));
-        navGroup.getChildren().addAll(btnDashboard, btnBarang, btnStok, btnTransaksi, btnSupplier, btnGudang);
+        navGroup.getChildren().addAll(btnDashboard, btnBarang, btnKategori, btnStok, btnTransaksi, btnSupplier,
+                btnGudang);
         if (Session.isAdmin())
             navGroup.getChildren().add(btnLaporan);
 
@@ -107,6 +109,10 @@ public class MainView {
         btnBarang.setOnAction(e -> {
             setActivePage(new BarangView().getView());
             setActive(btnBarang);
+        });
+        btnKategori.setOnAction(e -> {
+            setActivePage(new KategoriView().getView());
+            setActive(btnKategori);
         });
         btnStok.setOnAction(e -> {
             setActivePage(new StokView().getView());
