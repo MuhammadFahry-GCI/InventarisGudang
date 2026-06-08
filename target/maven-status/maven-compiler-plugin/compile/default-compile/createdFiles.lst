@@ -1,5 +1,6 @@
 com\inventaris\view\BarangView.class
 com\inventaris\App.class
+com\inventaris\view\Gudangview$2.class
 com\inventaris\model\Supplier.class
 com\inventaris\view\StokView.class
 com\inventaris\view\SupplierView.class
@@ -21,5 +22,6 @@ com\inventaris\util\Session.class
 com\inventaris\view\Gudangview$1.class
 com\inventaris\view\StokView$1.class
 com\inventaris\model\User.class
+com\inventaris\view\SupplierView$2.class
 com\inventaris\view\TransaksiView$1.class
 com\inventaris\view\TransaksiView.class

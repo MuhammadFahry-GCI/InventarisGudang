@@ -55,7 +55,7 @@ public class Barang {
     }
 
     public boolean isStokMenipis() {
-        return totalStok <= stokMinimum;
+        return totalStok < stokMinimum;
     }
 
     public void setNamaBarang(String n) {

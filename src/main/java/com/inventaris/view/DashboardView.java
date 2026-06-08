@@ -120,6 +120,7 @@ public class DashboardView {
                             "JOIN gudang g ON t.id_gudang = g.id_gudang " +
                             "ORDER BY t.id_transaksi DESC LIMIT 8");
             boolean odd = false;
+            int rowNum = 1;
             while (rs.next()) {
                 odd = !odd;
                 HBox row = new HBox();
@@ -137,7 +138,7 @@ public class DashboardView {
                 };
 
                 String[] vals = {
-                        String.valueOf(rs.getInt("id_transaksi")),
+                        String.valueOf(rowNum),
                         rs.getString("nama_barang"),
                         rs.getString("nama_gudang"),
                         jenis,
@@ -161,6 +162,7 @@ public class DashboardView {
                     }
                 }
                 box.getChildren().add(row);
+                rowNum++;
             }
         } catch (Exception ex) {
             Label err = new Label("Gagal memuat data: " + ex.getMessage());
@@ -183,7 +185,7 @@ public class DashboardView {
             if (rs.next())
                 result[1] = rs.getInt(1);
             rs = st.executeQuery(
-                    "SELECT COUNT(DISTINCT b.id_barang) FROM barang b JOIN stok s ON b.id_barang=s.id_barang WHERE s.jumlah_stok<=b.stok_minimum");
+                    "SELECT COUNT(DISTINCT b.id_barang) FROM barang b JOIN stok s ON b.id_barang=s.id_barang WHERE s.jumlah_stok<b.stok_minimum");
             if (rs.next())
                 result[2] = rs.getInt(1);
             rs = st.executeQuery("SELECT COUNT(*) FROM transaksi");

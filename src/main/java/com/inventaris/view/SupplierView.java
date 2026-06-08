@@ -20,7 +20,10 @@ public class SupplierView {
     private TextField searchField;
     private ObservableList<Supplier> data = FXCollections.observableArrayList();
 
-    public SupplierView() { buildUI(); loadData(""); }
+    public SupplierView() {
+        buildUI();
+        loadData("");
+    }
 
     private void buildUI() {
         root = new VBox(0);
@@ -31,7 +34,8 @@ public class SupplierView {
         topbar.setAlignment(Pos.CENTER_LEFT);
         Label title = new Label("Data Supplier");
         title.getStyleClass().add("page-title");
-        Region sp = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
         searchField = new TextField();
         searchField.setPromptText("🔍  Cari supplier...");
         searchField.setPrefWidth(220);
@@ -45,9 +49,15 @@ public class SupplierView {
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.getStyleClass().add("table-view");
 
-        TableColumn<Supplier, Integer> colId = new TableColumn<>("#");
-        colId.setCellValueFactory(new PropertyValueFactory<>("idSupplier"));
+        TableColumn<Supplier, Void> colId = new TableColumn<>("#");
         colId.setMaxWidth(50);
+        colId.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : String.valueOf(getIndex() + 1));
+            }
+        });
 
         TableColumn<Supplier, String> colNama = new TableColumn<>("Nama Supplier");
         colNama.setCellValueFactory(new PropertyValueFactory<>("namaSupplier"));
@@ -63,21 +73,29 @@ public class SupplierView {
         colAksi.setMaxWidth(120);
         colAksi.setCellFactory(col -> new TableCell<>() {
             private final Button editBtn = new Button("✏ Edit");
-            private final Button delBtn  = new Button("🗑");
+            private final Button delBtn = new Button("🗑");
             {
                 editBtn.getStyleClass().add("btn-secondary");
                 delBtn.getStyleClass().add("btn-danger");
                 editBtn.setStyle("-fx-padding: 5 10; -fx-font-size: 12px;");
                 delBtn.setStyle("-fx-padding: 5 10;");
             }
-            @Override protected void updateItem(Void item, boolean empty) {
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) { setGraphic(null); return; }
+                if (empty) {
+                    setGraphic(null);
+                    return;
+                }
                 Supplier s = getTableView().getItems().get(getIndex());
                 editBtn.setOnAction(e -> showForm(s));
-                delBtn.setOnAction(e  -> deleteSupplier(s));
+                delBtn.setOnAction(e -> deleteSupplier(s));
                 HBox box = new HBox(6, editBtn, delBtn);
-                if (!Session.isAdmin()) { editBtn.setDisable(true); delBtn.setDisable(true); }
+                if (!Session.isAdmin()) {
+                    editBtn.setDisable(true);
+                    delBtn.setDisable(true);
+                }
                 setGraphic(box);
             }
         });
@@ -97,20 +115,21 @@ public class SupplierView {
         try {
             Connection conn = DatabaseConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(
-                "SELECT id_supplier, nama_supplier, kontak, alamat " +
-                "FROM supplier WHERE nama_supplier LIKE ? OR kontak LIKE ? ORDER BY nama_supplier");
+                    "SELECT id_supplier, nama_supplier, kontak, alamat " +
+                            "FROM supplier WHERE nama_supplier LIKE ? OR kontak LIKE ? ORDER BY nama_supplier");
             ps.setString(1, "%" + search + "%");
             ps.setString(2, "%" + search + "%");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 data.add(new Supplier(
-                    rs.getInt("id_supplier"),
-                    rs.getString("nama_supplier"),
-                    rs.getString("kontak"),
-                    rs.getString("alamat")
-                ));
+                        rs.getInt("id_supplier"),
+                        rs.getString("nama_supplier"),
+                        rs.getString("kontak"),
+                        rs.getString("alamat")));
             }
-        } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
+        } catch (Exception ex) {
+            showAlert("Error", ex.getMessage());
+        }
     }
 
     private void showForm(Supplier supplier) {
@@ -121,19 +140,20 @@ public class SupplierView {
         form.setPadding(new Insets(20));
         form.setPrefWidth(400);
 
-        TextField tfNama   = new TextField(supplier != null ? supplier.getNamaSupplier() : "");
-        TextField tfKontak = new TextField(supplier != null && !supplier.getKontak().equals("-") ? supplier.getKontak() : "");
-        TextField tfAlamat = new TextField(supplier != null && !supplier.getAlamat().equals("-") ? supplier.getAlamat() : "");
+        TextField tfNama = new TextField(supplier != null ? supplier.getNamaSupplier() : "");
+        TextField tfKontak = new TextField(
+                supplier != null && !supplier.getKontak().equals("-") ? supplier.getKontak() : "");
+        TextField tfAlamat = new TextField(
+                supplier != null && !supplier.getAlamat().equals("-") ? supplier.getAlamat() : "");
 
         tfNama.setPromptText("Contoh: PT. Maju Jaya");
         tfKontak.setPromptText("Contoh: 0812-1234-5678");
         tfAlamat.setPromptText("Contoh: Jl. Industri No. 1, Jakarta");
 
         form.getChildren().addAll(
-            fieldGroup("Nama Supplier *", tfNama),
-            fieldGroup("Kontak", tfKontak),
-            fieldGroup("Alamat", tfAlamat)
-        );
+                fieldGroup("Nama Supplier *", tfNama),
+                fieldGroup("Kontak", tfKontak),
+                fieldGroup("Alamat", tfAlamat));
 
         dialog.getDialogPane().setContent(form);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -151,10 +171,11 @@ public class SupplierView {
                 }
                 if (supplier != null) {
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                        "Simpan perubahan data supplier ini?", ButtonType.YES, ButtonType.NO);
+                            "Simpan perubahan data supplier ini?", ButtonType.YES, ButtonType.NO);
                     confirm.setTitle("Konfirmasi Edit");
                     confirm.showAndWait().ifPresent(c -> {
-                        if (c == ButtonType.YES) simpanSupplier(supplier, tfNama, tfKontak, tfAlamat);
+                        if (c == ButtonType.YES)
+                            simpanSupplier(supplier, tfNama, tfKontak, tfAlamat);
                     });
                 } else {
                     simpanSupplier(null, tfNama, tfKontak, tfAlamat);
@@ -168,7 +189,7 @@ public class SupplierView {
             Connection conn = DatabaseConnection.getConnection();
             if (supplier == null) {
                 PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO supplier(nama_supplier, kontak, alamat) VALUES(?,?,?)");
+                        "INSERT INTO supplier(nama_supplier, kontak, alamat) VALUES(?,?,?)");
                 ps.setString(1, tfNama.getText().trim());
                 ps.setString(2, tfKontak.getText().trim().isEmpty() ? null : tfKontak.getText().trim());
                 ps.setString(3, tfAlamat.getText().trim().isEmpty() ? null : tfAlamat.getText().trim());
@@ -176,7 +197,7 @@ public class SupplierView {
                 new Alert(Alert.AlertType.INFORMATION, "Supplier berhasil ditambahkan!").show();
             } else {
                 PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE supplier SET nama_supplier=?, kontak=?, alamat=? WHERE id_supplier=?");
+                        "UPDATE supplier SET nama_supplier=?, kontak=?, alamat=? WHERE id_supplier=?");
                 ps.setString(1, tfNama.getText().trim());
                 ps.setString(2, tfKontak.getText().trim().isEmpty() ? null : tfKontak.getText().trim());
                 ps.setString(3, tfAlamat.getText().trim().isEmpty() ? null : tfAlamat.getText().trim());
@@ -185,23 +206,27 @@ public class SupplierView {
                 new Alert(Alert.AlertType.INFORMATION, "Data supplier berhasil diperbarui!").show();
             }
             loadData(searchField.getText());
-        } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
+        } catch (Exception ex) {
+            showAlert("Error", ex.getMessage());
+        }
     }
 
     private void deleteSupplier(Supplier s) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-            "Hapus supplier \"" + s.getNamaSupplier() + "\"?\nData transaksi terkait tidak akan terhapus.",
-            ButtonType.YES, ButtonType.NO);
+                "Hapus supplier \"" + s.getNamaSupplier() + "\"?\nData transaksi terkait tidak akan terhapus.",
+                ButtonType.YES, ButtonType.NO);
         confirm.setTitle("Konfirmasi Hapus");
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
                 try {
                     DatabaseConnection.getConnection()
-                        .prepareStatement("DELETE FROM supplier WHERE id_supplier=" + s.getIdSupplier())
-                        .executeUpdate();
+                            .prepareStatement("DELETE FROM supplier WHERE id_supplier=" + s.getIdSupplier())
+                            .executeUpdate();
                     loadData(searchField.getText());
                     new Alert(Alert.AlertType.INFORMATION, "Supplier berhasil dihapus!").show();
-                } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
+                } catch (Exception ex) {
+                    showAlert("Error", ex.getMessage());
+                }
             }
         });
     }
@@ -209,12 +234,14 @@ public class SupplierView {
     private boolean isNamaSudahAda(String nama, int excludeId) {
         try {
             PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(
-                "SELECT COUNT(*) FROM supplier WHERE LOWER(nama_supplier) = LOWER(?) AND id_supplier != ?");
+                    "SELECT COUNT(*) FROM supplier WHERE LOWER(nama_supplier) = LOWER(?) AND id_supplier != ?");
             ps.setString(1, nama);
             ps.setInt(2, excludeId);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt(1) > 0;
-        } catch (Exception ignored) {}
+            if (rs.next())
+                return rs.getInt(1) > 0;
+        } catch (Exception ignored) {
+        }
         return false;
     }
 
@@ -230,5 +257,7 @@ public class SupplierView {
         new Alert(Alert.AlertType.ERROR, msg).show();
     }
 
-    public Parent getView() { return root; }
+    public Parent getView() {
+        return root;
+    }
 }

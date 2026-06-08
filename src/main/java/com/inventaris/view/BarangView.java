@@ -165,14 +165,20 @@ public class BarangView {
             ResultSet rs = ps.executeQuery();
 
             List<String> habis = new ArrayList<>();
+            List<String> menipis = new ArrayList<>();
             while (rs.next()) {
                 Barang b = new Barang(rs.getInt("id_barang"), rs.getInt("id_kategori"),
                         rs.getString("kode_barang"), rs.getString("nama_barang"),
                         rs.getString("satuan"), rs.getInt("stok_minimum"),
                         rs.getString("nama_kategori"), rs.getInt("total_stok"));
                 data.add(b);
-                if (rs.getInt("total_stok") == 0) {
+                int stok = rs.getInt("total_stok");
+                int min = rs.getInt("stok_minimum");
+                if (stok == 0) {
                     habis.add("• " + b.getNamaBarang() + " (" + b.getKodeBarang() + ")");
+                } else if (stok < min) {
+                    menipis.add("• " + b.getNamaBarang() + " (" + b.getKodeBarang() + ") — stok: " + stok + ", min: "
+                            + min);
                 }
             }
 
@@ -183,6 +189,16 @@ public class BarangView {
                 warning.setTitle("Peringatan Stok Habis");
                 warning.setHeaderText("Stok Habis Terdeteksi!");
                 warning.setContentText(pesanHabis);
+                warning.show();
+            }
+
+            // Alert WARNING jika ada barang stok menipis (di bawah minimum)
+            if (!menipis.isEmpty()) {
+                String pesanMenipis = "Barang berikut stoknya di bawah minimum:\n" + String.join("\n", menipis);
+                Alert warning = new Alert(Alert.AlertType.WARNING);
+                warning.setTitle("Peringatan Stok Menipis");
+                warning.setHeaderText("Stok Menipis Terdeteksi!");
+                warning.setContentText(pesanMenipis);
                 warning.show();
             }
 
